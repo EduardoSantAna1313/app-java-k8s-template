@@ -103,8 +103,8 @@ jobs:
     runs-on: ubuntu-latest
     #needs: build-image
     env:
-      IMAGE_NAME: ${{ needs.build-image.outputs.image_name }}
-      #IMAGE_NAME: app-java-k8s-template:db3acbb8340c3d85a20ec9174611e52ae5a77fb27358f20b952743f9e8f3d854
+      #IMAGE_NAME: ${{ needs.build-image.outputs.image_name }}
+      IMAGE_NAME: app-java-k8s-template:db3acbb8340c3d85a20ec9174611e52ae5a77fb27358f20b952743f9e8f3d854
 
     steps:
       - uses: actions/checkout@v3
@@ -136,12 +136,8 @@ jobs:
           image-ref: $AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/$IMAGE_NAME
           format: 'table'
           vuln-type: 'os,library'
-
-      - name: Run Trivy vulnerability scanner in tarball mode
-        uses: aquasecurity/trivy-action@master
-        with:
-          input: $IMAGE_NAME.tar
-          vuln-type: 'os,library'
+        env:
+          IMAGE_NAME: app-java-k8s-template:db3acbb8340c3d85a20ec9174611e52ae5a77fb27358f20b952743f9e8f3d854
 
   #deploy-k8s:
   #  runs-on: ubuntu-latest
