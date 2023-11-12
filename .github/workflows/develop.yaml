@@ -129,9 +129,10 @@ jobs:
 
   deploy-k8s:
     runs-on: ubuntu-latest
-    needs: build-image
+    #needs: build-image
     env:
-      IMAGE_NAME: ${{ needs.build-image.outputs.image_name }}
+      #IMAGE_NAME: ${{ needs.build-image.outputs.image_name }}
+      IMAGE_NAME: app-java-k8s-template:latest-ccf4700e866dead46eb45925904548f9e879156f
     steps:
       - uses: actions/checkout@v3
 
@@ -142,9 +143,6 @@ jobs:
           role-to-assume: ${{ env.AWS_ASSUME_ROLE }}
           aws-region: ${{ env.AWS_REGION }}
           role-session-name: github_actions_oidc_role
-
-      #- name: Docker login ECR
-      #  run: aws ecr get-login-password --region $AWS_REGION | docker login --username AWS --password-stdin $AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com
 
       # Install kubectl
       - name: Install kubectl
@@ -157,7 +155,7 @@ jobs:
       - name: Configure kubectl
         run: |
           aws eks update-kubeconfig --region ${{ env.AWS_REGION }} --name ${{ env.CLUSTER_NAME }}
-          kubectl get svc
+          pwd
         env:
           KUBECONFIG: $HOME/.kube/config
 
@@ -173,8 +171,6 @@ jobs:
       - name: Deploy Kubernetes
         working-directory: infra
         run: |
-          echo "Showing kube config"
-          cat $HOME/.kube/config
           echo "cluster info"
           kubectl cluster-info
           echo "Running config view"
@@ -182,5 +178,3 @@ jobs:
           cd $ENVIRONMENT
           echo "Applying..."
           kubectl apply -f .
-        env:
-          KUBECONFIG: $HOME/.kube/config
