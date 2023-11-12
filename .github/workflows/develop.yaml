@@ -168,7 +168,7 @@ jobs:
         working-directory: infra
         run: |
           cd $ENVIRONMENT
-          FULL_IMAGE_NAME=${{ env.AWS)ACCOUNT_ID }}.dkr.ecr.${{ env.AWS_REGION }}.amazonaws.com/${{ env.IMAGE_NAME }}
+          FULL_IMAGE_NAME=${{ env.AWS_ACCOUNT_ID }}.dkr.ecr.${{ env.AWS_REGION }}.amazonaws.com/${{ env.IMAGE_NAME }}
           sed -i 's/image: IMG/image: ${{ env.IMAGE_NAME }}/g' kubernetes.yaml
           echo "Showing formated file"
           cat kubernetes.yaml
