@@ -103,7 +103,7 @@ jobs:
     #needs: build-image
     env:
       #IMAGE_NAME: ${{ needs.build-image.outputs.docker_image }}
-    IMAGE_NAME: app-java-k8s-template:1699801925
+      IMAGE_NAME: app-java-k8s-template:1699801925
 
     steps:
       - uses: actions/checkout@v3
