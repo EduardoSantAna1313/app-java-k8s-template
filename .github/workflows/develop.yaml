@@ -68,6 +68,21 @@ jobs:
           name: app.jar
           path: artifacts
 
+      - name: Copy artifact
+        run: |
+          echo "Listing files"
+          ls
+          echo "Copying jar to app"
+          cp artifacts/app.jar app/app.jar
+
+      - name: Build the Docker image
+        working-directory: app
+        run: |
+          echo "Listing files"
+          ls
+          echo "Building the image"
+          docker build --file Dockerfile -t $REPOSITORY_NAME
+
       # Configure aws credentials with assumerole
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v3
@@ -78,15 +93,6 @@ jobs:
 
       - name: Docker login ECR
         run: aws ecr get-login-password --region sa-east-1 | docker login --username AWS --password-stdin $AWS_ACCOUNT_ID.dkr.ecr.sa-east-1.amazonaws.com
-
-      - name: Build the Docker image
-        run: |
-          echo "Listing files"
-          ls
-          echo "Copying jar to app"
-          cp artifacts/app.jar app/app.jar
-          echo "Building the image"
-          docker build app/ --file Dockerfile -t $REPOSITORY_NAME
 
       - name: Push Docker Image ECR
         id: push-image
