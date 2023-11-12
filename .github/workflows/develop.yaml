@@ -87,11 +87,11 @@ jobs:
         run: |
           docker tag app-java-k8s-template:latest $AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/$REPOSITORY_NAME:$IMAGE_TAG
           docker push $AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/$REPOSITORY_NAME:$IMAGE_TAG
-          echo "lambda_name=$REPOSITORY_NAME:$IMAGE_TAG" >> $GITHUB_OUTPUT
+          echo "image_name=$REPOSITORY_NAME:$IMAGE_TAG" >> $GITHUB_OUTPUT
           echo "::set-output name=image_name::$REPOSITORY_NAME:$IMAGE_TAG"
 
     outputs:
-      docker_image: ${{ steps.push-image.outputs.lambda_name }}
+      docker_image: ${{ steps.push-image.outputs.image_name }}
 
   # SCAN with Acqua/trivy
   scan-image:
@@ -155,12 +155,7 @@ jobs:
         shell: bash
 
       - name: Configure kubectl
-        run: |
-          echo "get-caller-identity"
-          aws sts get-caller-identity
-          aws eks update-kubeconfig --region ${{ env.AWS_REGION }} --name ${{ env.CLUSTER_NAME }}
-          echo "kubectl view config"
-          kubectl config view --minify
+        run: aws eks update-kubeconfig --region ${{ env.AWS_REGION }} --name ${{ env.CLUSTER_NAME }}
         env:
           KUBECONFIG: $HOME/.kube/config
 
@@ -169,7 +164,7 @@ jobs:
         run: |
           cd $ENVIRONMENT
           FULL_IMAGE_NAME=${{ env.AWS_ACCOUNT_ID }}.dkr.ecr.${{ env.AWS_REGION }}.amazonaws.com/${{ env.IMAGE_NAME }}
-          sed -i 's/image: IMG/image: ${{ env.IMAGE_NAME }}/g' kubernetes.yaml
+          sed -i 's/image: IMG/image: $env.FULL_IMAGE_NAME/g' kubernetes.yaml
           echo "Showing formated file"
           cat kubernetes.yaml
 
@@ -177,4 +172,5 @@ jobs:
         working-directory: infra
         run: |
           cd $ENVIRONMENT
+          echo "Applying..."
           kubectl apply -f .
