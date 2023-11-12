@@ -10,6 +10,7 @@ permissions:
   contents: read    # This is required for actions/checkout
 
 env:
+  AWS_ACCOUNT_ID: ${{ vars.AWS_REGION }}
   AWS_REGION: ${{ vars.AWS_REGION }}
   AWS_ASSUME_ROLE: ${{ vars.AWS_ASSUME_ROLE }}
   REPOSITORY_NAME: ${{ github.event.repository.name }}
@@ -58,18 +59,57 @@ jobs:
   build-image:
     runs-on: ubuntu-latest
     needs: build
+    env:
+      DOCKER_TAG=$(date +%s)
 
     steps:
-    - uses: actions/checkout@v3
+      - uses: actions/checkout@v3
 
-    - uses: actions/download-artifact@master
+      - uses: actions/download-artifact@master
+        with:
+          name: app.jar
+          path: artifacts
+
+      # Configure aws credentials with assumerole
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v3
+        with:
+          role-to-assume: ${{ env.AWS_ASSUME_ROLE }}
+          aws-region: ${{ env.AWS_REGION }}
+          role-session-name: github_actions_oidc_role
+
+      - name: Docker login ECR
+        run: aws ecr get-login-password --region sa-east-1 | docker login --username AWS --password-stdin $AWS_ACCOUNT_ID.dkr.ecr.sa-east-1.amazonaws.com
+
+      - name: Build the Docker image
+        working-directory: app
+        run: docker build . --file Dockerfile -t $REPOSITORY_NAME
+
+      - name: Push Docker Image ECR
+        id: push-image
+        working-directory: app
+        run: |
+          ls
+          docker tag app-java-k8s-template:latest $AWS_ACCOUNT_ID.dkr.ecr.sa-east-1.amazonaws.com/$REPOSITORY_NAME:$DOCKER_TAG
+          docker push $AWS_ACCOUNT_ID.dkr.ecr.sa-east-1.amazonaws.com/$REPOSITORY_NAME:$DOCKER_TAG
+          echo "docker_image=$REPOSITORY_NAME:$DOCKER_TAG" >> $GITHUB_OUTPUT
+
+      - name: Print docker image
+        run: echo $REPOSITORY_NAME:$DOCKER_TAG
+
+    outputs:
+      docker_image: ${{ steps.push-image.outputs.docker_image }}
+
+  scan-image:
+    - name: Run Trivy vulnerability scanner
+      uses: aquasecurity/trivy-action@master
       with:
-        name: $APP_JAR
-        path: artifacts
-
-    - name: Build the Docker image
-      working-directory: app
-      run: docker build . --file Dockerfile --tag my-image-name:$(date +%s)
+        image-ref: $$REPOSITORY_NAME
+        format: 'table'
+        exit-code: '1'
+        ignore-unfixed: true
+        vuln-type: 'os,library'
+        severity: 'CRITICAL,HIGH'
 
   #deploy-k8s:
   #  runs-on: ubuntu-latest
