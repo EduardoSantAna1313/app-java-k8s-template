@@ -164,10 +164,10 @@ jobs:
         working-directory: infra
         run: |
           cd $ENVIRONMENT
-          FULL_IMAGE_NAME=${{ env.AWS_ACCOUNT_ID }}.dkr.ecr.${{ env.AWS_REGION }}.amazonaws.com/${{ env.IMAGE_NAME }}
-          echo "Full image name"
-          echo $FULL_IMAGE_NAME
-          sed -i 's/image: IMG/image: ${{ env.FULL_IMAGE_NAME }}/g' kubernetes.yaml
+          FULL_IMAGE_NAME="image: ${{ env.AWS_ACCOUNT_ID }}.dkr.ecr.${{ env.AWS_REGION }}.amazonaws.com/${{ env.IMAGE_NAME }}"
+          TARGET_TEXT="image: IMG"
+          REPLACEMENT_TEXT=$(sed 's/[&/\]/\\&/g' <<< "FULL_IMAGE_NAME")
+          sed -i "s/$TARGET_TEXT/$REPLACEMENT_TEXT/g" kubernetes.yaml
           echo "Showing formated file"
           cat kubernetes.yaml
 
