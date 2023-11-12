@@ -1,0 +1,44 @@
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: first-app-namespace
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: first-app
+  namespace: first-app-namespace
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: first-app
+  template:
+    metadata:
+      labels:
+        app: first-app
+    spec:
+      containers:
+        - name: first-app
+          image: IMG
+          resources:
+            limits:
+              memory: 512M
+              cpu: "1000m"
+          ports:
+            - containerPort: 8080
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: first-app-svc
+  labels:
+    app: first-app
+spec:
+  type: LoadBalancer
+  ports:
+    - port: 80
+      targetPort: 8080
+  selector:
+    app: first-app
