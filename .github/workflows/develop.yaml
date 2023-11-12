@@ -84,15 +84,15 @@ jobs:
           role-session-name: github_actions_oidc_role
 
       - name: Docker login ECR
-        run: aws ecr get-login-password --region sa-east-1 | docker login --username AWS --password-stdin $AWS_ACCOUNT_ID.dkr.ecr.sa-east-1.amazonaws.com
+        run: aws ecr get-login-password --region $AWS_REGION | docker login --username AWS --password-stdin $AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com
 
       - name: Push Docker Image ECR
         id: push-image
         working-directory: app
         run: |
           DOCKER_TAG=$(date +%s)
-          docker tag app-java-k8s-template:latest $AWS_ACCOUNT_ID.dkr.ecr.sa-east-1.amazonaws.com/$REPOSITORY_NAME:$DOCKER_TAG
-          docker push $AWS_ACCOUNT_ID.dkr.ecr.sa-east-1.amazonaws.com/$REPOSITORY_NAME:$DOCKER_TAG
+          docker tag app-java-k8s-template:latest $AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/$REPOSITORY_NAME:$DOCKER_TAG
+          docker push $AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/$REPOSITORY_NAME:$DOCKER_TAG
           echo "docker_image=$REPOSITORY_NAME:$DOCKER_TAG" >> $GITHUB_OUTPUT
 
     outputs:
@@ -132,7 +132,7 @@ jobs:
       - name: Run Trivy vulnerability scanner
         uses: aquasecurity/trivy-action@master
         with:
-          image-ref: $AWS_ACCOUNT_ID.dkr.ecr.region.amazonaws.com/$IMAGE_NAME
+          image-ref: $AWS_ACCOUNT_ID.dkr.ecr.sa-east-1.amazonaws.com/$IMAGE_NAME
           format: 'table'
           vuln-type: 'os,library'
 
