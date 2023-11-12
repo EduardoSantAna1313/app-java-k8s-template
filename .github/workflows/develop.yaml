@@ -155,7 +155,12 @@ jobs:
         shell: bash
 
       - name: Configure kubectl
-        run: aws eks update-kubeconfig --region ${{ env.AWS_REGION }} --name ${{ env.CLUSTER_NAME }}
+        run: |
+          aws eks update-kubeconfig --region ${{ env.AWS_REGION }} --name ${{ env.CLUSTER_NAME }}
+          echo "Running config view"
+          kubectl config view --minify
+          echo "Listing cluster info"
+          kubectl cluster-info
         env:
           KUBECONFIG: $HOME/.kube/config
 
@@ -167,12 +172,13 @@ jobs:
           TARGET_TEXT="image: IMG"
           REPLACEMENT_TEXT=$(sed 's/[&/\]/\\&/g' <<< "$FULL_IMAGE_NAME")
           sed -i "s/$TARGET_TEXT/$REPLACEMENT_TEXT/g" kubernetes.yaml
-          echo "Showing formated file"
-          cat kubernetes.yaml
 
       - name: Deploy Kubernetes
         working-directory: infra
         run: |
+          kubectl config view
           cd $ENVIRONMENT
           echo "Applying..."
           kubectl apply -f .
+        env:
+          KUBECONFIG: $HOME/.kube/config
