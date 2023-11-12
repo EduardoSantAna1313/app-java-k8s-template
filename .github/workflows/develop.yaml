@@ -144,21 +144,6 @@ jobs:
           aws-region: ${{ env.AWS_REGION }}
           role-session-name: github_actions_oidc_role
 
-      # Install kubectl
-      - name: Install kubectl
-        run: |
-          curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"
-          chmod +x kubectl
-          sudo mv kubectl /usr/local/bin/
-        shell: bash
-
-      - name: Configure kubectl
-        run: |
-          aws eks update-kubeconfig --region ${{ env.AWS_REGION }} --name ${{ env.CLUSTER_NAME }}
-          pwd
-        env:
-          KUBECONFIG: $HOME/.kube/config
-
       - name: Configura manifest
         working-directory: infra
         run: |
@@ -168,13 +153,17 @@ jobs:
           REPLACEMENT_TEXT=$(sed 's/[&/\]/\\&/g' <<< "$FULL_IMAGE_NAME")
           sed -i "s/$TARGET_TEXT/$REPLACEMENT_TEXT/g" kubernetes.yaml
 
-      - name: Deploy Kubernetes
-        working-directory: infra
+      # Install kubectl
+      - name: Install kubectl
         run: |
-          echo "cluster info"
-          kubectl cluster-info
-          echo "Running config view"
-          kubectl config view --minify
-          cd $ENVIRONMENT
-          echo "Applying..."
+          curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"
+          chmod +x kubectl
+          sudo mv kubectl /usr/local/bin/
+        shell: bash
+
+      - name: Deploy kubectl
+        run: |
+          aws eks update-kubeconfig --region ${{ env.AWS_REGION }} --name ${{ env.CLUSTER_NAME }}
           kubectl apply -f .
+        env:
+          KUBECONFIG: $HOME/.kube/config
