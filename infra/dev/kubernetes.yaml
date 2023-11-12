@@ -24,8 +24,8 @@ spec:
         image: IMG
         resources:
           limits:
-            memory: 128M
-            cpu: "500m"
+            memory: 512M
+            cpu: "1000m"
         ports:
         - containerPort: 8080
 ---
@@ -41,4 +41,4 @@ spec:
     - port: 80
       targetPort: 8080
   selector:
-    app: first-app-nginx
+    app: first-app

@@ -129,10 +129,9 @@ jobs:
 
   deploy-k8s:
     runs-on: ubuntu-latest
-    #needs: build-image
+    needs: build-image
     env:
-      #IMAGE_NAME: ${{ needs.build-image.outputs.image_name }}
-      IMAGE_NAME: app-java-k8s-template:latest-ccf4700e866dead46eb45925904548f9e879156f
+      IMAGE_NAME: ${{ needs.build-image.outputs.image_name }}
     steps:
       - uses: actions/checkout@v3
 
