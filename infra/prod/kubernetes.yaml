@@ -129,6 +129,7 @@ jobs:
           format: 'table'
           vuln-type: 'os,library'
 
+  # Kubernetes
   deploy-k8s:
     runs-on: ubuntu-latest
     needs: build-image
