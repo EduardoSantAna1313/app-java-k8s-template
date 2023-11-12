@@ -133,7 +133,8 @@ jobs:
     runs-on: ubuntu-latest
     needs: build-image
     env:
-      IMAGE_NAME: ${{ needs.build-image.outputs.lambda_name }}
+      #IMAGE_NAME: ${{ needs.build-image.outputs.lambda_name }}
+      IMAGE_NAME: app-java-k8s-template:latest-a73d43adc0670506959a9e7a235fa1b37868246b
     steps:
       - uses: actions/checkout@v3
 
@@ -154,12 +155,20 @@ jobs:
         shell: bash
 
       - name: Configure kubectl
-        run: aws eks update-kubeconfig --region ${{ env.AWS_REGION }} --name ${{ env.CLUSTER_NAME }}
+        run: |
+          echo "get-caller-identity"
+          aws sts get-caller-identity
+          aws eks update-kubeconfig --region ${{ env.AWS_REGION }} --name ${{ env.CLUSTER_NAME }}
+          echo "kubectl view config"
+          kubectl config view --minify
+        env:
+          KUBECONFIG: $HOME/.kube/config
 
       - name: Configura manifest
         working-directory: infra
         run: |
           cd $ENVIRONMENT
+          FULL_IMAGE_NAME=${{ env.AWS)ACCOUNT_ID }}.dkr.ecr.${{ env.AWS_REGION }}.amazonaws.com/${{ env.IMAGE_NAME }}
           sed -i 's/image: IMG/image: ${{ env.IMAGE_NAME }}/g' kubernetes.yaml
           echo "Showing formated file"
           cat kubernetes.yaml
