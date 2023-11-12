@@ -129,14 +129,14 @@ jobs:
       - name: Run Trivy vulnerability scanner
         uses: aquasecurity/trivy-action@master
         with:
-          image-ref: $AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/${{ needs.build-image.outputs.image_name }}
+          image-ref: $AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/$IMAGE_NAME
           format: 'table'
           vuln-type: 'os,library'
 
   scan-image2:
     runs-on: ubuntu-latest
     env:
-      IMAGE_NAME: app-java-k8s-template:sha256:${{ github.sha }}
+      IMAGE_NAME: app-java-k8s-template:latest-2dcc26a4987c1a9aae1b35f32265ce119c886f45
 
     steps:
       - uses: actions/checkout@v3
@@ -155,7 +155,7 @@ jobs:
       - name: Run Trivy vulnerability scanner
         uses: aquasecurity/trivy-action@master
         with:
-          image-ref: 329158668427.dkr.ecr.sa-east-1.amazonaws.com/app-java-k8s-template:latest-2dcc26a4987c1a9aae1b35f32265ce119c886f45
+          image-ref: 329158668427.dkr.ecr.sa-east-1.amazonaws.com/$IMAGE_NAME
           format: 'table'
           vuln-type: 'os,library'
 
