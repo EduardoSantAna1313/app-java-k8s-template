@@ -164,6 +164,6 @@ jobs:
       - name: Deploy kubectl
         run: |
           aws eks update-kubeconfig --region ${{ env.AWS_REGION }} --name ${{ env.CLUSTER_NAME }}
-          kubectl apply -f .
+          kubectl apply -f infra/${{ env.ENVIRONMENT }}/
         env:
           KUBECONFIG: $HOME/.kube/config
