@@ -69,19 +69,11 @@ jobs:
           path: artifacts
 
       - name: Copy artifact
-        run: |
-          echo "Listing files"
-          ls
-          echo "Copying jar to app"
-          cp artifacts/app.jar app/app.jar
+        run: cp artifacts/app.jar app/app.jar
 
       - name: Build the Docker image
         working-directory: app
-        run: |
-          echo "Listing files"
-          ls
-          echo "Building the image"
-          docker build . --file Dockerfile -t $REPOSITORY_NAME
+        run: docker build . --file Dockerfile -t $REPOSITORY_NAME
 
       # Configure aws credentials with assumerole
       - name: Configure AWS Credentials
@@ -98,7 +90,6 @@ jobs:
         id: push-image
         working-directory: app
         run: |
-          ls
           DOCKER_TAG=$(date +%s)
           docker tag app-java-k8s-template:latest $AWS_ACCOUNT_ID.dkr.ecr.sa-east-1.amazonaws.com/$REPOSITORY_NAME:$DOCKER_TAG
           docker push $AWS_ACCOUNT_ID.dkr.ecr.sa-east-1.amazonaws.com/$REPOSITORY_NAME:$DOCKER_TAG
@@ -115,6 +106,14 @@ jobs:
 
     steps:
       - uses: actions/checkout@v3
+
+      # Configure aws credentials with assumerole
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v3
+        with:
+          role-to-assume: ${{ env.AWS_ASSUME_ROLE }}
+          aws-region: ${{ env.AWS_REGION }}
+          role-session-name: github_actions_oidc_role
 
       #- name: Pull image
       #  run: |
