@@ -14,7 +14,7 @@ env:
   AWS_REGION: ${{ vars.AWS_REGION }}
   AWS_ASSUME_ROLE: ${{ vars.AWS_ASSUME_ROLE }}
   REPOSITORY_NAME: ${{ github.event.repository.name }}
-  CLUSTER_NAME: ${{ var.CLUSTER_NAME }}
+  CLUSTER_NAME: ${{ vars.CLUSTER_NAME }}
   ENVIRONMENT: "dev"
 
 jobs:
