@@ -41,7 +41,6 @@ jobs:
 
     - name: Uploading artifacts
       uses: actions/upload-artifact@master
-      working-directory: app
       with:
         name: app.jar
         path: artifacts
