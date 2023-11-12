@@ -155,8 +155,9 @@ jobs:
         shell: bash
 
       - name: Configure kubectl
-        run: aws eks update-kubeconfig --region ${{ env.AWS_REGION }} --name ${{ env.CLUSTER_NAME }}
-
+        run: |
+          aws eks update-kubeconfig --region ${{ env.AWS_REGION }} --name ${{ env.CLUSTER_NAME }}
+          kubectl get svc
         env:
           KUBECONFIG: $HOME/.kube/config
 
@@ -172,10 +173,14 @@ jobs:
       - name: Deploy Kubernetes
         working-directory: infra
         run: |
+          echo "Showing kube config"
+          cat $HOME/.kube/config
+          echo "cluster info"
+          kubectl cluster-info
           echo "Running config view"
           kubectl config view --minify
-          echo "Listing cluster info"
-          kubectl cluster-info
           cd $ENVIRONMENT
           echo "Applying..."
           kubectl apply -f .
+        env:
+          KUBECONFIG: $HOME/.kube/config
