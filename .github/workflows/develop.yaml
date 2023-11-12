@@ -51,9 +51,6 @@ jobs:
 
     - name: Uploading artifacts
       uses: actions/upload-artifact@master
-      run: |
-        echo "Uploading app.jar"
-        ls
       with:
         name: app.jar
         path: artifacts
