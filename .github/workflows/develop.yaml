@@ -36,8 +36,18 @@ jobs:
       working-directory: app
       run: |
         mvn -B package --file pom.xml
+
+    - run: |
+        echo "Current folder"
+        pwd
+        echo "Listing files"
+        ls
+        echo "Creating folder artifacts"
         mkdir artifacts
-        cp target/*.jar artifacts/app.jar
+        echo "Copying jar"
+        cp app/target/*.jar artifacts/app.jar
+        echo "Listing files"
+        ls artifacts
 
     - name: Uploading artifacts
       uses: actions/upload-artifact@master
