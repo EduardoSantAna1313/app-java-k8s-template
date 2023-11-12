@@ -81,7 +81,7 @@ jobs:
           echo "Listing files"
           ls
           echo "Building the image"
-          docker build --file Dockerfile -t $REPOSITORY_NAME
+          docker build . --file Dockerfile -t $REPOSITORY_NAME
 
       # Configure aws credentials with assumerole
       - name: Configure AWS Credentials
